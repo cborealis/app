@@ -1093,9 +1093,8 @@ xBrowserSync.App.Controller = function ($scope, $q, $timeout, complexify, platfo
 
     var init = function () {
         var displayUpdated, syncEnabled, syncId;
-
         // Platform-specific initation
-        return platform.Init(vm, $scope)
+        return platform.Init(vm)
             .then(function () {
                 // Reset network disconnected flag
                 return platform.LocalStorage.Set(globals.CacheKeys.NetworkDisconnected, false);

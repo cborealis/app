@@ -686,22 +686,21 @@ xBrowserSync.App.PlatformImplementation = function ($http, $interval, $q, $timeo
 		}
 	};
 
-	var init = function (viewModel, scope) {
-		// Set global variables
-		vm = viewModel;
+	var init = function (viewModel) {
+		// Get cached sync data and enable event listeners
+		return platform.LocalStorage.Set(globals.CacheKeys.DisableEventListeners, false)
+			.then(function () {
+				// Set global variables
+				vm = viewModel;
+				vm.platformName = globals.Platforms.Firefox;
 
-		// Set platform
-		vm.platformName = globals.Platforms.Firefox;
-
-		// Enable event listeners
-		globals.DisableEventListeners.Set(false);
-
-		// Get async channel for syncing in background
-		viewModel.sync.asyncChannel = getAsyncChannel(function (msg) {
-			viewModel.scope.$apply(function () {
-				viewModel.events.handleSyncResponse(msg);
+				// Get async channel for syncing in background
+				viewModel.sync.asyncChannel = getAsyncChannel(function (msg) {
+					viewModel.scope.$apply(function () {
+						viewModel.events.handleSyncResponse(msg);
+					});
+				});
 			});
-		});
 
 		// If logged in, focus on search box, otherwise focus on login field
 		$timeout(function () {

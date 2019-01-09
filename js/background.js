@@ -411,40 +411,10 @@ xBrowserSync.App.ExtensionBackground.config(['$compileProvider', function ($comp
 	$compileProvider.debugInfoEnabled(false);
 }]);
 
-// Add platform service
-xBrowserSync.App.Platform.$inject = ['$q'];
-xBrowserSync.App.ExtensionBackground.factory('platform', xBrowserSync.App.Platform);
-
-// Add global service
-xBrowserSync.App.Global.$inject = ['platform'];
-xBrowserSync.App.ExtensionBackground.factory('globals', xBrowserSync.App.Global);
-
-// Add httpInterceptor service
-xBrowserSync.App.HttpInterceptor.$inject = ['$q', 'globals'];
-xBrowserSync.App.ExtensionBackground.factory('httpInterceptor', xBrowserSync.App.HttpInterceptor);
-xBrowserSync.App.ExtensionBackground.config(['$httpProvider', function ($httpProvider) {
-	$httpProvider.interceptors.push('httpInterceptor');
-}]);
-
-// Add utility service
-xBrowserSync.App.Utility.$inject = ['$q', 'platform', 'globals'];
-xBrowserSync.App.ExtensionBackground.factory('utility', xBrowserSync.App.Utility);
-
-// Add api service
-xBrowserSync.App.API.$inject = ['$http', '$q', 'platform', 'globals', 'utility'];
-xBrowserSync.App.ExtensionBackground.factory('api', xBrowserSync.App.API);
-
-// Add bookmarks service
-xBrowserSync.App.Bookmarks.$inject = ['$q', '$timeout', 'platform', 'globals', 'api', 'utility'];
-xBrowserSync.App.ExtensionBackground.factory('bookmarks', xBrowserSync.App.Bookmarks);
-
-// Add platform implementation service
-xBrowserSync.App.PlatformImplementation.$inject = ['$http', '$interval', '$q', '$timeout', 'platform', 'globals', 'utility', 'bookmarks'];
-xBrowserSync.App.ExtensionBackground.factory('platformImplementation', xBrowserSync.App.PlatformImplementation);
+injectAppServices(xBrowserSync.App.ExtensionBackground);
 
 // Add background module
-xBrowserSync.App.Background.$inject = ['$q', 'platform', 'globals', 'utility', 'api', 'bookmarks', 'platformImplementation'];
-xBrowserSync.App.ExtensionBackground.controller('Controller', xBrowserSync.App.Background);
+xBrowserSync.App.ExtensionBackground.controller('Controller', ['$q', 'platform', 'globals', 'utility', 'api', 'bookmarks', 'platformImplementation', xBrowserSync.App.Background]);
 
 // Set synchronous event handlers
 ext.runtime.onInstalled.addListener(function () {

@@ -262,17 +262,7 @@ xBrowserSync.App.Global = function (platform) {
                 value = platform.LocalStorage.Get(
                     'xBrowserSync-disableEventListeners');
 
-                if (!value) {
-                    return false;
-                }
-                else {
-                    if (value === 'true') {
-                        return true;
-                    }
-                    else {
-                        return false;
-                    }
-                }
+                return (value === 'true');
             },
             Set: function (value) {
                 platform.LocalStorage.Set(
@@ -287,18 +277,8 @@ xBrowserSync.App.Global = function (platform) {
                 value = platform.LocalStorage.Get(
                     'xBrowserSync-displayUpdated');
 
-                if (!value) {
-                    return false;
-                }
-                else {
-                    if (value === 'true') {
-                        return true;
-                    }
-                    else {
-                        return false;
-                    }
-                }
-            },
+                return (value === 'true');
+                },
             Set: function (value) {
                 platform.LocalStorage.Set(
                     'xBrowserSync-displayUpdated',
@@ -365,18 +345,8 @@ xBrowserSync.App.Global = function (platform) {
                 value = platform.LocalStorage.Get(
                     'xBrowserSync-isSyncing');
 
-                if (!value) {
-                    return false;
-                }
-                else {
-                    if (value === 'true') {
-                        return true;
-                    }
-                    else {
-                        return false;
-                    }
-                }
-            },
+                return (value === 'true');
+                },
             Set: function (value) {
                 platform.LocalStorage.Set(
                     'xBrowserSync-isSyncing',
@@ -399,17 +369,7 @@ xBrowserSync.App.Global = function (platform) {
                     value = platform.LocalStorage.Get(
                         'xBrowserSync-networkDisconnected');
 
-                    if (!value) {
-                        return true;
-                    }
-                    else {
-                        if (value === 'true') {
-                            return true;
-                        }
-                        else {
-                            return false;
-                        }
-                    }
+                    return (!value || value === 'true');
                 },
                 Set: function (value) {
                     platform.LocalStorage.Set(
@@ -420,7 +380,8 @@ xBrowserSync.App.Global = function (platform) {
         },
         Platforms: {
             Android: 'android',
-            Chrome: 'chrome'
+            Chrome: 'chrome',
+            Firefox: 'firefox'
         },
         Regex: {
             Url: /(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i
@@ -440,17 +401,7 @@ xBrowserSync.App.Global = function (platform) {
                 value = platform.LocalStorage.Get(
                     'xBrowserSync-syncBookmarksToolbar');
 
-                if (!value) {
-                    return true;
-                }
-                else {
-                    if (value === 'true') {
-                        return true;
-                    }
-                    else {
-                        return false;
-                    }
-                }
+                return (!value || value === 'true');
             },
             Set: function (value) {
                 platform.LocalStorage.Set(
@@ -465,17 +416,7 @@ xBrowserSync.App.Global = function (platform) {
                 value = platform.LocalStorage.Get(
                     'xBrowserSync-syncEnabled');
 
-                if (!value) {
-                    return false;
-                }
-                else {
-                    if (value === 'true') {
-                        return true;
-                    }
-                    else {
-                        return false;
-                    }
-                }
+                return (value === 'true');
             },
             Set: function (value) {
                 platform.LocalStorage.Set(
