@@ -1245,7 +1245,7 @@ xBrowserSync.App.PlatformImplementation = function ($http, $interval, $q, $timeo
 				if (!displayIntro && compareVersions(mobileAppVersion, globals.AppVersion) < 0) {
 					return $q.all([
 						globals.SyncEnabled.Set(false),
-						globals.DisplayUpdated.Set(true)
+						platform.LocalStorage.Set(globals.CacheKeys.DisplayUpdated, true)
 					]);
 				}
 			})

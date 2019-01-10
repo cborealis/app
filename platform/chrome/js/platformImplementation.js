@@ -602,16 +602,50 @@ xBrowserSync.App.PlatformImplementation = function ($http, $interval, $q, $timeo
 	};
 
 	var getFromLocalStorage = function (storageKeys) {
+        return browser.storage.local.get(storageKeys).then(function(storageItems) {
+			if (Array.isArray(storageKeys)) {
+				console.log(storageItems);
+				return storageItems;
+			}
+			else {
+				console.log(storageItems);
+				return storageItems[storageKeys];
+			}
+	   });
+
+		// return $q(function (resolve, reject) {
+		// 	try {
+		// 		chrome.storage.local.get(storageKeys, function (storageItems) {
+		// 			if (Array.isArray(storageKeys)) {
+		// 				resolve(storageItems);
+		// 			}
+		// 			else {
+		// 				resolve(storageItems[storageKeys]);
+		// 			}
+		// 		});
+		// 	}
+		// 	catch (err) {
+		// 		reject(err);
+		// 	}
+		// });
+	};
+
+	var setInLocalStorage = function (storageKey, value) {
 		return $q(function (resolve, reject) {
 			try {
-				chrome.storage.local.get(storageKeys, function (storageItems) {
-					if (Array.isArray(storageKeys)) {
-						resolve(storageItems);
-					}
-					else {
-						resolve(storageItems[storageKeys]);
-					}
-				});
+				if (value != null) {
+					var storageObj = {};
+					storageObj[storageKey] = value;
+
+					chrome.storage.local.set(storageObj, function () {
+						resolve();
+					});
+				}
+				else {
+					chrome.storage.local.remove(storageKey, function () {
+						resolve();
+					});
+				}
 			}
 			catch (err) {
 				reject(err);
@@ -818,29 +852,6 @@ xBrowserSync.App.PlatformImplementation = function ($http, $interval, $q, $timeo
 				chrome.browserAction.setIcon({ path: iconPath });
 				chrome.browserAction.setTitle({ title: tooltip });
 			});
-	};
-
-	var setInLocalStorage = function (storageKey, value) {
-		return $q(function (resolve, reject) {
-			try {
-				if (value != null) {
-					var storageObj = {};
-					storageObj[storageKey] = value;
-
-					chrome.storage.local.set(storageObj, function () {
-						resolve();
-					});
-				}
-				else {
-					chrome.storage.local.remove(storageKey, function () {
-						resolve();
-					});
-				}
-			}
-			catch (err) {
-				reject(err);
-			}
-		});
 	};
 
 	var startAutoUpdates = function () {

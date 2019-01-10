@@ -255,36 +255,6 @@ xBrowserSync.App.Global = function (platform) {
             Error_FailedShareUrl_Title: 'error_FailedShareUrl_Title',
             Error_FailedShareUrlNotSynced_Title: 'error_FailedShareUrlNotSynced_Title'
         },
-        DisableEventListeners: {
-            Get: function () {
-                var value;
-
-                value = platform.LocalStorage.Get(
-                    'xBrowserSync-disableEventListeners');
-
-                return (value === 'true');
-            },
-            Set: function (value) {
-                platform.LocalStorage.Set(
-                    'xBrowserSync-disableEventListeners',
-                    value);
-            }
-        },
-        DisplayUpdated: {
-            Get: function () {
-                var value;
-
-                value = platform.LocalStorage.Get(
-                    'xBrowserSync-displayUpdated');
-
-                return (value === 'true');
-                },
-            Set: function (value) {
-                platform.LocalStorage.Set(
-                    'xBrowserSync-displayUpdated',
-                    value);
-            }
-        },
         ErrorCodes: {
             HttpRequestFailed: 10000,
             HttpRequestFailedWhileUpdating: 10001,

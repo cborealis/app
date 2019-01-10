@@ -1,8 +1,6 @@
 var xBrowserSync = xBrowserSync || {};
 xBrowserSync.App = xBrowserSync.App || {};
 
-var ext = new Extension();
-
 /* ------------------------------------------------------------------------------------
  * Class name:	xBrowserSync.App.Background
  * Description:	Initialises Extension background required functionality; registers events; 
@@ -29,7 +27,7 @@ xBrowserSync.App.Background = function ($q, platform, globals, utility, api, boo
 			switch (details.reason) {
 				case 'update':
 					if (details.previousVersion &&
-						details.previousVersion !== chrome.runtime.getManifest().version) {
+						details.previousVersion !== browser.runtime.getManifest().version) {
 						// If extension has been updated display updated message
 						platform.LocalStorage.Set(globals.CacheKeys.DisplayUpdated, true);
 					}
@@ -86,13 +84,13 @@ xBrowserSync.App.Background = function ($q, platform, globals, utility, api, boo
 				});
 		};
 
-		ext.runtime.onConnect.addListener(listenForMessages);
-		ext.runtime.onMessage.addListener(handleMessage);
-		ext.alarms.onAlarm.addListener(handleAlarm);
-		ext.bookmarks.onCreated.addListener(createBookmark);
-		ext.bookmarks.onRemoved.addListener(removeBookmark);
-		ext.bookmarks.onChanged.addListener(changeBookmark);
-		ext.bookmarks.onMoved.addListener(moveBookmark);
+		browser.runtime.onConnect.addListener(listenForMessages);
+		browser.runtime.onMessage.addListener(handleMessage);
+		browser.alarms.onAlarm.addListener(handleAlarm);
+		browser.bookmarks.onCreated.addListener(createBookmark);
+		browser.bookmarks.onRemoved.addListener(removeBookmark);
+		browser.bookmarks.onChanged.addListener(changeBookmark);
+		browser.bookmarks.onMoved.addListener(moveBookmark);
 	};
 
 
@@ -187,7 +185,7 @@ xBrowserSync.App.Background = function ($q, platform, globals, utility, api, boo
 			callback = null;
 		}
 
-		ext.notifications.create('xBrowserSync-notification', options, callback);
+		browser.notifications.create('xBrowserSync-notification', options, callback);
 	};
 
 	var getLatestUpdates = function () {
@@ -218,23 +216,23 @@ xBrowserSync.App.Background = function ($q, platform, globals, utility, api, boo
 		// When alarm fires check for sync updates
 		if (alarm && alarm.name === globals.Alarm.Name) {
 			getLatestUpdates()
-				.catch(function (err) {
-					// If ID was removed disable sync
-					if (err.code === globals.ErrorCodes.NoDataFound) {
-						err.code = globals.ErrorCodes.IdRemoved;
-						bookmarks.DisableSync();
-					}
+				// .catch(function (err) {
+				// 	// If ID was removed disable sync
+				// 	if (err.code === globals.ErrorCodes.NoDataFound) {
+				// 		err.code = globals.ErrorCodes.IdRemoved;
+				// 		bookmarks.DisableSync();
+				// 	}
 
-					// Don't display alert if sync failed due to network connection
-					if (err.code === globals.ErrorCodes.HttpRequestFailed ||
-						err.code === globals.ErrorCodes.HttpRequestFailedWhileUpdating) {
-						return;
-					}
+				// 	// Don't display alert if sync failed due to network connection
+				// 	if (err.code === globals.ErrorCodes.HttpRequestFailed ||
+				// 		err.code === globals.ErrorCodes.HttpRequestFailedWhileUpdating) {
+				// 		return;
+				// 	}
 
-					// Display alert
-					var errMessage = utility.GetErrorMessageFromException(err);
-					displayAlert(errMessage.title, errMessage.message);
-				});
+				// 	// Display alert
+				// 	var errMessage = utility.GetErrorMessageFromException(err);
+				// 	displayAlert(errMessage.title, errMessage.message);
+				// });
 		}
 	};
 
@@ -417,9 +415,9 @@ injectAppServices(xBrowserSync.App.ExtensionBackground);
 xBrowserSync.App.ExtensionBackground.controller('Controller', ['$q', 'platform', 'globals', 'utility', 'api', 'bookmarks', 'platformImplementation', xBrowserSync.App.Background]);
 
 // Set synchronous event handlers
-ext.runtime.onInstalled.addListener(function () {
+browser.runtime.onInstalled.addListener(function () {
 	document.querySelector('#install').click();
 });
-ext.runtime.onStartup.addListener(function () {
+browser.runtime.onStartup.addListener(function () {
 	document.querySelector('#startup').click();
 });

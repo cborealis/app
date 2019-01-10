@@ -71,7 +71,7 @@ xBrowserSync.App.Bookmarks = function ($q, $timeout, platform, globals, api, uti
             })
             .then(function (data) {
                 // If last updated is different the date in local storage, refresh bookmarks
-                return !lastUpdated || lastUpdated.getTime() !== (new Date(data.lastUpdated)).getTime();
+                return !lastUpdated || lastUpdated !== data.lastUpdated;
             })
             .catch(function (err) {
                 // Check if sync should be disabled
@@ -840,8 +840,7 @@ xBrowserSync.App.Bookmarks = function ($q, $timeout, platform, globals, api, uti
                             return $q.reject({ code: globals.ErrorCodes.MissingClientData });
                         });
                 }
-            })
-            .then(function () {
+
                 if (syncData.bookmarks) {
                     // Sync with provided bookmarks
                     getBookmarksToSync = $q.resolve(syncData.bookmarks || []);
@@ -852,8 +851,10 @@ xBrowserSync.App.Bookmarks = function ($q, $timeout, platform, globals, api, uti
                     };
                     getBookmarksToSync = api.GetBookmarks()
                         .then(function (data) {
+                            console.log(lastUpdated);
+                            console.log(data.lastUpdated);
                             // Check if data is out of sync
-                            if (lastUpdated.getTime() !== (new Date(data.lastUpdated)).getTime()) {
+                            if (!lastUpdated || lastUpdated !== data.lastUpdated) {
                                 return $q.reject({ code: globals.ErrorCodes.DataOutOfSync });
                             }
 
@@ -1052,7 +1053,7 @@ xBrowserSync.App.Bookmarks = function ($q, $timeout, platform, globals, api, uti
                     getBookmarks = api.GetBookmarks()
                         .then(function (data) {
                             // Check if data is out of sync
-                            if (lastUpdated.getTime() !== (new Date(data.lastUpdated)).getTime()) {
+                            if (!lastUpdated || lastUpdated !== data.lastUpdated) {
                                 return $q.reject({ code: globals.ErrorCodes.DataOutOfSync });
                             }
 
