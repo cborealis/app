@@ -1961,7 +1961,7 @@ xBrowserSync.App.Controller = function ($scope, $q, $timeout, complexify, platfo
                 }
 
                 // Enable setting and hide sync confirmation
-                platform.LocalStorage.Set(SyncBookmarksToolbar, true);
+                platform.LocalStorage.Set(globals.CacheKeys.SyncBookmarksToolbar, true);
                 vm.settings.displaySyncBookmarksToolbarConfirmation = false;
 
                 // Display loading overlay
