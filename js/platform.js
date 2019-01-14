@@ -9,7 +9,7 @@ xBrowserSync.App = xBrowserSync.App || {};
  *              platform/chrome//platformImplementation.js.
  * ------------------------------------------------------------------------------------ */
 
-xBrowserSync.App.Platform = function ($q) {
+xBrowserSync.App.Platform = function () {
 	'use strict';
 
 	var notImplemented = function () {
@@ -20,6 +20,48 @@ xBrowserSync.App.Platform = function ($q) {
 
 		// Throw not implemented exception
 		throw new NotImplementedException();
+	};
+
+	/**
+	 * 
+	 * @param {string} constName 
+	 * @param {string | string[]} [substitutions]
+	 * @returns {string}
+	 */
+	var getConstant = function (constName, substitutions) {
+		return browser.i18n.getMessage(constName, substitutions);
+	};
+
+	/**
+	 * @param {string | string[]} storageKeys 
+	 * @returns {Promise}
+	 */
+	var getFromLocalStorage = function (storageKeys) {
+        return browser.storage.local.get(storageKeys).then(function(storageItems) {
+			if (Array.isArray(storageKeys)) {
+				console.log(storageItems);
+				return storageItems;
+			}
+			else {
+				console.log(storageItems);
+				return storageItems[storageKeys];
+			}
+	   });
+	};
+
+	/**
+	 * @param {string} storageKey 
+	 * @param {*} value 
+	 * @returns {Promise<void>}
+	 */
+	var setInLocalStorage = function (storageKey, value) {
+		if (value != null) {
+			var storageObj = {};
+			storageObj[storageKey] = value;
+			return browser.storage.local.set(storageObj);
+		} else {
+			return browser.storage.local.remove(storageKey);
+		}
 	};
 
 	return {
@@ -42,7 +84,7 @@ xBrowserSync.App.Platform = function ($q) {
 			Updated: notImplemented,
 			UpdateSingle: notImplemented
 		},
-		GetConstant: notImplemented,
+		GetConstant: getConstant,
 		GetCurrentUrl: notImplemented,
 		GetPageMetadata: notImplemented,
 		Init: notImplemented,
@@ -54,8 +96,8 @@ xBrowserSync.App.Platform = function ($q) {
 			Refresh: notImplemented
 		},
 		LocalStorage: {
-			Get: notImplemented,
-			Set: notImplemented
+			Get: getFromLocalStorage,
+			Set: setInLocalStorage
 		},
 		OpenUrl: notImplemented,
 		ScanID: notImplemented,

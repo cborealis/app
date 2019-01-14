@@ -41,15 +41,12 @@ xBrowserSync.App.PlatformImplementation = function ($http, $interval, $q, $timeo
 		platform.Bookmarks.Populate = populateBookmarks;
 		platform.Bookmarks.Updated = bookmarksUpdated;
 		platform.Bookmarks.UpdateSingle = updateSingle;
-		platform.GetConstant = getConstant;
 		platform.GetCurrentUrl = getCurrentUrl;
 		platform.GetPageMetadata = getPageMetadata;
 		platform.Init = init;
 		platform.Interface.Loading.Hide = hideLoading;
 		platform.Interface.Loading.Show = displayLoading;
 		platform.Interface.Refresh = refreshInterface;
-		platform.LocalStorage.Get = getFromLocalStorage;
-		platform.LocalStorage.Set = setInLocalStorage;
 		platform.OpenUrl = openUrl;
 		platform.Sync = sync;
 
@@ -57,6 +54,7 @@ xBrowserSync.App.PlatformImplementation = function ($http, $interval, $q, $timeo
 		refreshInterface();
 	};
 
+	var getConstant = platform.GetConstant;
 
 	/* ------------------------------------------------------------------------------------
 	 * Public functions
@@ -581,10 +579,6 @@ xBrowserSync.App.PlatformImplementation = function ($http, $interval, $q, $timeo
 			});
 	};
 
-	var getConstant = function (constName) {
-		return chrome.i18n.getMessage(constName);
-	};
-
 	var getCurrentUrl = function () {
 		var deferred = $q.defer();
 
@@ -599,58 +593,6 @@ xBrowserSync.App.PlatformImplementation = function ($http, $interval, $q, $timeo
 			});
 
 		return deferred.promise;
-	};
-
-	var getFromLocalStorage = function (storageKeys) {
-        return browser.storage.local.get(storageKeys).then(function(storageItems) {
-			if (Array.isArray(storageKeys)) {
-				console.log(storageItems);
-				return storageItems;
-			}
-			else {
-				console.log(storageItems);
-				return storageItems[storageKeys];
-			}
-	   });
-
-		// return $q(function (resolve, reject) {
-		// 	try {
-		// 		chrome.storage.local.get(storageKeys, function (storageItems) {
-		// 			if (Array.isArray(storageKeys)) {
-		// 				resolve(storageItems);
-		// 			}
-		// 			else {
-		// 				resolve(storageItems[storageKeys]);
-		// 			}
-		// 		});
-		// 	}
-		// 	catch (err) {
-		// 		reject(err);
-		// 	}
-		// });
-	};
-
-	var setInLocalStorage = function (storageKey, value) {
-		return $q(function (resolve, reject) {
-			try {
-				if (value != null) {
-					var storageObj = {};
-					storageObj[storageKey] = value;
-
-					chrome.storage.local.set(storageObj, function () {
-						resolve();
-					});
-				}
-				else {
-					chrome.storage.local.remove(storageKey, function () {
-						resolve();
-					});
-				}
-			}
-			catch (err) {
-				reject(err);
-			}
-		});
 	};
 
 	var getPageMetadata = function () {

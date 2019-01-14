@@ -14,8 +14,11 @@ xBrowserSync.App.API = function ($http, $q, platform, globals, utility) {
 	/* ------------------------------------------------------------------------------------
 	 * Public functions
 	 * ------------------------------------------------------------------------------------ */
-
-	var checkServiceStatus = function (url) {
+	
+	/**
+	 * @param {string} url 
+	 */
+	 var checkServiceStatus = function (url) {
 		var data;
 
 		// Get current service url if not provided

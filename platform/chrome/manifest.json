@@ -14,7 +14,7 @@
     "default_popup": "app.html",
     "default_title": "__MSG_title__"
   },
-  "options_page": "app.html",
+  "options_page": "test.html",
   "background": {
     "page": "background.html",
     "persistent": false

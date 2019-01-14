@@ -42,7 +42,6 @@ xBrowserSync.App.PlatformImplementation = function ($http, $interval, $q, $timeo
 		platform.Bookmarks.Populate = populateBookmarks;
 		platform.Bookmarks.Updated = bookmarksUpdated;
 		platform.Bookmarks.UpdateSingle = updateSingle;
-		platform.GetConstant = getConstant;
 		platform.GetCurrentUrl = getCurrentUrl;
 		platform.GetPageMetadata = getPageMetadata;
 		platform.Init = init;
@@ -625,10 +624,6 @@ xBrowserSync.App.PlatformImplementation = function ($http, $interval, $q, $timeo
 				// Add unique ids
 				return addIdsToBookmarks(xBookmarks);
 			});
-	};
-
-	var getConstant = function (constName) {
-		return browser.i18n.getMessage(constName);
 	};
 
 	var getCurrentUrl = function () {

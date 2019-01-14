@@ -8,7 +8,7 @@ function disableDebugInfo(module) {
 
 function injectAppServices(module) {
     // Add platform service
-    module.factory('platform', ['$q', xBrowserSync.App.Platform]);
+    module.factory('platform', [xBrowserSync.App.Platform]);
 
     // Add global service
     module.factory('globals', ['platform', xBrowserSync.App.Global]);

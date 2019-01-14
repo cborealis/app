@@ -30,6 +30,10 @@ xBrowserSync.App.Utility = function ($q, platform, globals) {
 		);
 	};
 
+	/**
+	 * @param {Uint8Array} firstArr 
+	 * @param {Uint8Array} secondArr 
+	 */
 	var concatUint8Arrays = function concatUint8Arrays(firstArr, secondArr) {
 		firstArr = firstArr || new Uint8Array();
 		secondArr = secondArr || new Uint8Array();
@@ -379,6 +383,9 @@ xBrowserSync.App.Utility = function ($q, platform, globals) {
 			});
 	};
 
+	/**
+	 * @returns {Promise<string>}
+	 */
 	var getServiceUrl = function () {
 		// Get service url from local storage
 		return platform.LocalStorage.Get(globals.CacheKeys.ServiceUrl)
@@ -464,6 +471,9 @@ xBrowserSync.App.Utility = function ($q, platform, globals) {
 			});
 	};
 
+	/**
+	 * @param {string} url 
+	 */
 	var parseUrl = function (url) {
 		var parser = document.createElement('a'),
 			searchObject = {},
