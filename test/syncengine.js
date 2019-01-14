@@ -6,7 +6,7 @@ xBrowserSync.LocalStorage = function() {
         SyncStatus: 'syncStatus',
         ServerBookmarks: 'serverBookmarks'
     }
-}
+};
 
 /**
  * @param {string | string[]} storageKeys 
@@ -43,7 +43,7 @@ xBrowserSync.LocalStorage.prototype.set = function (storageKey, value) {
 
 xBrowserSync.Settings = function(localStorage) {
     this.localStorage = localStorage;
-}
+};
 
 
 xBrowserSync.XBookmark = function (title, url, description, tags, children, xid, id, index, parentId, dateAdded, dateGroupModified) {
@@ -545,19 +545,29 @@ xBrowserSync.SyncEngine = function (localStorage, platform, globals, api, utilit
     }
 };
 
-xBrowserSync.SyncEngine.prototype.getOrCreateLocalBookmarks = function() {
+xBrowserSync.SyncEngine.prototype.getLocalBookmarks = function() {
     return this.localStorage.get(this.localStorage.storageKeys.LocalBookmarks)
-    .then(function (localBookmarks) {
-        if (localBookmarks) {   // TODO check not empty
+    .then((localBookmarks) => {
+        if (localBookmarks) {
             return localBookmarks;
+        } else {
+            return {};
         }
-        return this.platform.getBookmarks()
-        .then(function (browserBookmarks) {
+    })
+};
+
+// TODO call in init
+xBrowserSync.SyncEngine.prototype.syncBrowserToLocalBookmarks = function() {
+    return this.getLocalBookmarks()
+    .then((localBookmarks) => {
+        return browser.bookmarks.getTree()
+        .then((browserBookmarks) => {
+
             return this.localStorage.set(this.localStorage.storageKeys.LocalBookmarks, browserBookmarks)
-            .then(() => browserBookmarks);
+                .then(() => browserBookmarks);
         });
     })
-}
+};
 
 /*
 

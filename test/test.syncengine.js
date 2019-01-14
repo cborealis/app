@@ -14,7 +14,7 @@ describe('LocalStorage', function() {
     it('can get local bookmarks', function() {
       var ls = new xBrowserSync.LocalStorage();
       var x = new xBrowserSync.SyncEngine(ls);
-      return x.getOrCreateLocalBookmarks()
+      return x.syncBrowserToLocalBookmarks()
       .then((val) => expect(val).to.eql({}))
     });
 
