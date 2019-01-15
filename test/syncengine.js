@@ -45,13 +45,47 @@ xBrowserSync.Settings = function(localStorage) {
     this.localStorage = localStorage;
 };
 
+xBrowserSync.Bookmarks = function ($q, $timeout, platform, globals, api, utility) {
+    'use strict';
+}
+
+/**
+ * @callback iteratorCallback
+ * @param {number} bookmark
+ */
+/**
+ * @param {browser.bookmarks.BookmarkTreeNode[]} bookmarks
+ * @param {iteratorCallback} iteratee
+ */
+xBrowserSync.Bookmarks.prototype.forEachBookmark = function (bookmarks, iteratee) {
+    // Run the iteratee function for every bookmark
+    (function iterateBookmarks(bookmarksToIterate) {
+        for (var i = 0; i < bookmarksToIterate.length; i++) {
+            iteratee(bookmarksToIterate[i]);
+
+            // If the bookmark has children, iterate them
+            if (bookmarksToIterate[i].children && bookmarksToIterate[i].children.length > 0) {
+                iterateBookmarks(bookmarksToIterate[i].children);
+            }
+        }
+    })(bookmarks);
+};
+
+/**
+ * @returns {Promise<browser.bookmarks.BookmarkTreeNode[]>}
+ */
+xBrowserSync.Bookmarks.prototype.getBrowserBookmarks = function() {
+    return browser.bookmarks.getTree().then((bookmarks) => bookmarks[0].children);
+}
 
 xBrowserSync.XBookmark = function (title, url, description, tags, children, xid, id, index, parentId, dateAdded, dateGroupModified) {
     this.xid = xid;
-    this.id = id;   // this browser
-    this.index = index;  // this browser
-    this.parentId = parentId;
+    this.xparentId;
+    this.id = id;   // local to this browser
+    this.index = index;  // local to this browser
+    this.parentId = parentId;  // local to this browser
     this.dateAdded = dateAdded;
+    this.dateModified;
     this.dateGroupModified = dateGroupModified;
     this.favIcon;
     this.rating;
@@ -82,13 +116,17 @@ xBrowserSync.XBookmark = function (title, url, description, tags, children, xid,
  * Class name:	xBrowserSync.SyncEngine
  * Description:	Responsible for synchronizing bookmark data.
  * @param {xBrowserSync.LocalStorage} localStorage
+ * @param {xBrowserSync.Bookmarks} bookmarks
  */
-xBrowserSync.SyncEngine = function (localStorage, platform, globals, api, utility) {
+xBrowserSync.SyncEngine = function (localStorage, bookmarks, platform, globals, api, utility) {
     'use strict';
 
     this.moduleName = 'xBrowserSync.SyncEngine';
     this.localStorage = localStorage;
+    this.bookmarks = bookmarks;
     this.platform = platform;
+    this.globals = globals;
+    this.api = api;
 
     /* ------------------------------------------------------------------------------------
      * Public functions
@@ -551,23 +589,48 @@ xBrowserSync.SyncEngine.prototype.getLocalBookmarks = function() {
         if (localBookmarks) {
             return localBookmarks;
         } else {
-            return {};
+            return [];
         }
     })
 };
 
+xBrowserSync.SyncEngine.prototype.extendBrowserBookmarkWithXBookmark = function(bookmark, xbookmark) {
+    for (v in xbookmark) {
+        // copy all properties that bookmark doesn't already have
+        if (bookmark[v] == undefined) {
+            bookmark[v] = xbookmark[v];
+        }
+    }
+}
+
 // TODO call in init
+// call this in a timer loop for edge
 xBrowserSync.SyncEngine.prototype.syncBrowserToLocalBookmarks = function() {
     return this.getLocalBookmarks()
     .then((localBookmarks) => {
-        return browser.bookmarks.getTree()
+        return this.bookmarks.getBrowserBookmarks()
         .then((browserBookmarks) => {
-
+            // Get all local bookmarks into dictionary
+            var xBookmarks = {};
+            this.bookmarks.forEachBookmark(localBookmarks, (xbookmark) => {
+                xBookmarks[xbookmark.id] = xbookmark;
+            });
+            this.bookmarks.forEachBookmark(browserBookmarks, (bookmark) => {
+                if (xBookmarks[bookmark.id]) {
+                   this.extendBrowserBookmarkWithXBookmark(bookmark, xBookmarks[bookmark.id]);
+                }
+            });
+            console.log(browserBookmarks);
             return this.localStorage.set(this.localStorage.storageKeys.LocalBookmarks, browserBookmarks)
                 .then(() => browserBookmarks);
         });
     })
 };
+
+
+xBrowserSync.SyncEngine.prototype.syncLocalAndServerBookmarks = function() {
+    return this.api.GetBookmarksLastUpdated();
+}
 
 /*
 
@@ -577,7 +640,7 @@ xBrowserSync.SyncEngine.prototype.syncBrowserToLocalBookmarks = function() {
 
   all bookmark listeners/actions:
   if (!localBookmarks)
-    localBookmarks = getAllBrowserBookmarks
+    localBookmarks = getAllBrowserBookmarks => do in init()
   update localBookmarks with change
 
   sync_all:
