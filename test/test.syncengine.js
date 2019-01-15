@@ -1,20 +1,20 @@
 
 describe('LocalStorage', function() {
   it('can get and set localstorage', function() {
-    var x = new xBrowserSync.LocalStorage();
+    var x = xBrowserSync.LocalStorage();
     return x.get("something")
     .then((val) => expect(val).to.eql(undefined))
     .then(() => x.set("something", "1234"))
     .then(() => x.get("something"))
     .then((val) => expect(val).to.eql("1234"))
-    .then(() => x.set("something"));
+    .then(() => x.set("something", null));
   });
 });
   
 describe('SyncEngine', function() {
   it('can get local bookmarks', function() {
-    var ls = new xBrowserSync.LocalStorage();
-    var bm = new xBrowserSync.Bookmarks();
+    var ls = xBrowserSync.LocalStorage();
+    var bm = xBrowserSync.Bookmarks(ls);
     var x = new xBrowserSync.SyncEngine(ls, bm);
     return x.syncBrowserToLocalBookmarks()
     .then((val) => expect(val).to.eql({}))
@@ -35,9 +35,9 @@ describe('SyncEngine', function() {
     let platform = $injector.get('platform');
     let globals = $injector.get('globals');
     let api = $injector.get('api');
+    let ls = $injector.get('localstorage');
 
-    var ls = new xBrowserSync.LocalStorage();
-    var bm = new xBrowserSync.Bookmarks();
+    var bm = xBrowserSync.Bookmarks(ls);
     var x = new xBrowserSync.SyncEngine(ls, bm, platform, globals, api);
     x.syncLocalAndServerBookmarks().then((a) => console.log(a));
   });

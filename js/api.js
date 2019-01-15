@@ -1,12 +1,13 @@
 var xBrowserSync = xBrowserSync || {};
 xBrowserSync.App = xBrowserSync.App || {};
 
-/* ------------------------------------------------------------------------------------
+/** ------------------------------------------------------------------------------------
  * Class name:	xBrowserSync.App.API
  * Description:	Responsible for communicating with the xBrowserSync API service.
+ * @param {xBrowserSync.Settings} settings
+ * @param {xBrowserSync.App.Global} globals
  * ------------------------------------------------------------------------------------ */
-
-xBrowserSync.App.API = function ($http, $q, platform, globals, utility) {
+xBrowserSync.App.API = function ($http, $q, settings, globals, utility) {
 	'use strict';
 
 	var moduleName = 'xBrowserSync.App.API';
@@ -22,7 +23,7 @@ xBrowserSync.App.API = function ($http, $q, platform, globals, utility) {
 		var data;
 
 		// Get current service url if not provided
-		var getServiceUrl = !url ? utility.GetServiceUrl() : $q.resolve(url);
+		var getServiceUrl = !url ? settings.getServiceUrl() : $q.resolve(url);
 		return getServiceUrl
 			.then(function (serviceUrl) {
 				// Request service info
@@ -68,7 +69,7 @@ xBrowserSync.App.API = function ($http, $q, platform, globals, utility) {
 	var createNewSync = function () {
 		var data;
 
-		return utility.GetServiceUrl()
+		return settings.getServiceUrl()
 			.then(function (serviceUrl) {
 				var data = {
 					version: globals.AppVersion
@@ -104,20 +105,14 @@ xBrowserSync.App.API = function ($http, $q, platform, globals, utility) {
 		var data, password, syncId;
 
 		// Check secret and sync ID are present
-		return platform.LocalStorage.Get([
-			globals.CacheKeys.Password,
-			globals.CacheKeys.SyncId,
-		])
-			.then(function (cachedData) {
-				password = cachedData[globals.CacheKeys.Password];
-				syncId = cachedData[globals.CacheKeys.SyncId];
-
+		return settings.getPasswordAndSyncId()
+			.then(function ([password, syncId]) {
 				if (!password || !syncId) {
 					return $q.reject({ code: globals.ErrorCodes.MissingClientData });
 				}
 
 				// Get current service url
-				return utility.GetServiceUrl();
+				return settings.getServiceUrl();
 			})
 			.then(function (serviceUrl) {
 				return $http.get(serviceUrl + globals.URL.Bookmarks + '/' + syncId,
@@ -159,20 +154,15 @@ xBrowserSync.App.API = function ($http, $q, platform, globals, utility) {
 		var data, password, syncId;
 
 		// Check secret and sync ID are present
-		return platform.LocalStorage.Get([
-			globals.CacheKeys.Password,
-			globals.CacheKeys.SyncId,
-		])
-			.then(function (cachedData) {
-				password = cachedData[globals.CacheKeys.Password];
-				syncId = cachedData[globals.CacheKeys.SyncId];
-
+		return settings.getPasswordAndSyncId()
+			.then(function ([password, syncId]) {
+console.log("yay! " + password + "  " + syncId);
 				if (!password || !syncId) {
 					return $q.reject({ code: globals.ErrorCodes.MissingClientData });
 				}
 
 				// Get current service url
-				return utility.GetServiceUrl();
+				return settings.getServiceUrl();
 			})
 			.then(function (serviceUrl) {
 				return $http.get(serviceUrl + globals.URL.Bookmarks +
@@ -205,7 +195,7 @@ xBrowserSync.App.API = function ($http, $q, platform, globals, utility) {
 		var data;
 
 		// Get current service url
-		return utility.GetServiceUrl()
+		return settings.getServiceUrl()
 			.then(function (serviceUrl) {
 				return $http.get(serviceUrl + globals.URL.Bookmarks +
 					'/' + syncId + globals.URL.Version);
@@ -237,20 +227,15 @@ xBrowserSync.App.API = function ($http, $q, platform, globals, utility) {
 		var data, password, syncId;
 
 		// Check secret and sync ID are present
-		return platform.LocalStorage.Get([
-			globals.CacheKeys.Password,
-			globals.CacheKeys.SyncId,
-		])
-			.then(function (cachedData) {
-				password = cachedData[globals.CacheKeys.Password];
-				syncId = cachedData[globals.CacheKeys.SyncId];
+		return settings.getPasswordAndSyncId()
+			.then(function ([password, syncId]) {
 
 				if (!password || !syncId) {
 					return $q.reject({ code: globals.ErrorCodes.MissingClientData });
 				}
 
 				// Get current service url
-				return utility.GetServiceUrl();
+				return settings.getServiceUrl();
 			})
 			.then(function (serviceUrl) {
 				var data = {
@@ -295,7 +280,7 @@ xBrowserSync.App.API = function ($http, $q, platform, globals, utility) {
 
 	var apiRequestSucceeded = function (response) {
 		// Reset network disconnected flag
-		return platform.LocalStorage.Set(globals.CacheKeys.NetworkDisconnected, false)
+		return settings.setNetworkDisconnected(false)
 			.then(function () {
 				return response;
 			});
@@ -327,10 +312,11 @@ xBrowserSync.App.API = function ($http, $q, platform, globals, utility) {
 				break;
 			// -1: No network connection
 			case -1:
-				getErrorCodePromise = platform.LocalStorage.Set(globals.CacheKeys.NetworkDisconnected, true)
+				getErrorCodePromise = settings.setNetworkDisconnected(true)
 					.then(function () {
 						return globals.ErrorCodes.HttpRequestFailed;
 					});
+				break;
 			// Otherwise generic request failed
 			default:
 				getErrorCodePromise = $q.resolve(globals.ErrorCodes.HttpRequestFailed);
@@ -344,7 +330,7 @@ xBrowserSync.App.API = function ($http, $q, platform, globals, utility) {
 			});
 	};
 
-	return {
+	return /** @exports xBrowserSync.App.API */ {
 		CheckServiceStatus: checkServiceStatus,
 		CreateNewSync: createNewSync,
 		GetBookmarks: getBookmarks,

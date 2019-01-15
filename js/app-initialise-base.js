@@ -19,11 +19,17 @@ function injectAppServices(module) {
         $httpProvider.interceptors.push('httpInterceptor');
     }]);
 
+    // Add local storage service
+    module.factory('localstorage', [xBrowserSync.LocalStorage]);
+
+    // Add local storage service
+    module.factory('settings', ['localstorage', 'globals', xBrowserSync.Settings]);
+
     // Add utility service
     module.factory('utility', ['$q', 'platform', 'globals', xBrowserSync.App.Utility]);
 
     // Add api service
-    module.factory('api', ['$http', '$q', 'platform', 'globals', 'utility', xBrowserSync.App.API]);
+    module.factory('api', ['$http', '$q', 'settings', 'globals', 'utility', xBrowserSync.App.API]);
 
     // Add bookmarks service
     module.factory('bookmarks', ['$q', '$timeout', 'platform', 'globals', 'api', 'utility', xBrowserSync.App.Bookmarks]);
