@@ -820,59 +820,6 @@ xBrowserSync.App.Bookmarks = function ($q, $timeout, platform, globals, api, uti
             });
     };
 
-    /*
-      https://unterwaditzer.net/2016/sync-algorithm.html
-
-      all bookmark listeners/actions:
-      if (!localBookmarks)
-        localBookmarks = getAllBrowserBookmarks
-      update localBookmarks with change
-
-      sync_all:
-      var localBookmarks, serverBookmarks, syncStatus (in localstorage)
-      if (!localBookmarks)
-        localBookmarks = getAllBrowserBookmarks
-      if (!syncStatus)
-        syncStatus = {}
-
-      doAgain:
-      serverBookmarks = getBookmarksFromServer
-      syncTwoWay(localBookmarks, serverBookmarks, syncStatus)
-      storeBookmarksToServer(serverBookmarks)
-      -> may throw OptimisticLockError when lastsync changed in the meantime
-        -> doAgain
-
-
-      syncTwoWay:
-      A !B !status:
-        insert A in B, insert in status
-      !A B !status:
-        insert B in A, insert in status
-      A !B status:
-        A != status.A:
-          conflictResolution, update status
-        A == status.A:
-            delete B in A, delete status
-      !A B status:
-        B != status.B:
-          conflictResolution, update status
-        B == status.B:
-            delete A in B, delete status
-      A B !status:
-        conflictResolution, insert in status
-      !A !B status:
-        delete in status
-      A B status:
-        A != status.A && B == status.B:
-          update B with A, update status
-        A == status.A && B != status.B:
-          update A with B, update status
-        A != status.A && B != status.B:
-          conflictResolution, update status
-
-
-     */
-
     var sync_handleBoth = function (syncData) {
         var bookmarks, getBookmarksToSync, lastUpdated, updateLocalBookmarksInfo;
 

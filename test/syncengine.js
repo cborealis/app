@@ -253,7 +253,11 @@ xBrowserSync.SyncEngine = function (localStorage, bookmarks, platform, globals, 
                 console.log(serverBookmarks);
                 console.log(localBookmarks);
                 console.log(syncStatus);
+                return self.doMerge(serverBookmarks, localBookmarks, syncStatus);
             })
+        },
+
+        doMerge: function(serverBookmarks, localBookmarks, syncStatus) {
 
         },
         
