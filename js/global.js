@@ -9,6 +9,7 @@ xBrowserSync.App = xBrowserSync.App || {};
 xBrowserSync.App.Global = function (platform) {
     'use strict';
 
+    /** @class xGlobal */
     var Global = {
         Alarm: {
             Name: 'xBrowserSync-alarm',

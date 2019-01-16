@@ -1,12 +1,19 @@
+//@ ts-check
+
 var xBrowserSync = xBrowserSync || {};
 
 /** ------------------------------------------------------------------------------------
  * Class name:	xBrowserSync.Bookmarks
  * Description:
- * @param {xBrowserSync.LocalStorage} localStorage
+ * @param {xGlobal} globals
+ * @param {xLocalStorage} localStorage
+ * @param {xSettings} settings
+ * @param {xEncryption} encryption
+ * @param {xAPI} api
  * ------------------------------------------------------------------------------------ */
 xBrowserSync.Bookmarks = function (globals, localStorage, settings, encryption, api) {
     'use strict';
+    /** @class xBookmarks */
     var self = {
         /**
          * @callback iteratorCallback
@@ -145,7 +152,7 @@ xBrowserSync.Bookmarks = function (globals, localStorage, settings, encryption, 
 
     };
     return self;
-}
+};
 
 /** ------------------------------------------------------------------------------------
  * Class name:	xBrowserSync.XBookmark
@@ -188,9 +195,12 @@ xBrowserSync.XBookmark = function (title, url, description, tags, children, xid,
 /** ------------------------------------------------------------------------------------
  * Class name:	xBrowserSync.SyncEngine
  * Description:	Responsible for synchronizing bookmark data.
- * @param {xBrowserSync.LocalStorage} localStorage
- * @param {xBrowserSync.Bookmarks} bookmarks
- * @param {xBrowserSync.App.API} api
+ * @param {xLocalStorage} localStorage
+ * @param {xBookmarks} bookmarks
+ * @param {xPlatform} platform
+ * @param {xGlobal} globals
+ * @param {xAPI} api
+ * @param {xUtility} utility
  * ------------------------------------------------------------------------------------ */
 xBrowserSync.SyncEngine = function (localStorage, bookmarks, platform, globals, api, utility) {
     'use strict';

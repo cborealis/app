@@ -3,12 +3,12 @@ var xBrowserSync = xBrowserSync || {};
 /** ------------------------------------------------------------------------------------
  * Class name:	xBrowserSync.Settings
  * Description:
- * @param {xBrowserSync.LocalStorage} localStorage
- * @param {xBrowserSync.App.Global} globals
+ * @param {xLocalStorage} localStorage
+ * @param {xGlobal} globals
  * ------------------------------------------------------------------------------------ */
 xBrowserSync.Settings = function(localStorage, globals) {
     'use strict';
-    return {
+    return /** @class xSettings */ {
         getServiceUrl: function () {
             // Get service url from local storage
             return localStorage.get(localStorage.storageKeys.ServiceUrl)

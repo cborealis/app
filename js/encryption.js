@@ -5,6 +5,7 @@ var xBrowserSync = xBrowserSync || {};
  * Description:
  * ------------------------------------------------------------------------------------ */
 xBrowserSync.Encryption = function(settings) {
+    /** @class xEncryption */
     var self = {
         decryptData: function (encryptedData) {
             // Determine which decryption method to use based on sync version

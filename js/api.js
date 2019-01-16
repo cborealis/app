@@ -4,8 +4,8 @@ xBrowserSync.App = xBrowserSync.App || {};
 /** ------------------------------------------------------------------------------------
  * Class name:	xBrowserSync.App.API
  * Description:	Responsible for communicating with the xBrowserSync API service.
- * @param {xBrowserSync.Settings} settings
- * @param {xBrowserSync.App.Global} globals
+ * @param {xSettings} settings
+ * @param {xGlobal} globals
  * ------------------------------------------------------------------------------------ */
 xBrowserSync.App.API = function ($http, $q, settings, globals, utility) {
 	'use strict';
@@ -332,7 +332,7 @@ console.log("yep! " +  syncId);
 			});
 	};
 
-	return /** @exports xBrowserSync.App.API */ {
+	return /** @class xAPI */ {
 		CheckServiceStatus: checkServiceStatus,
 		CreateNewSync: createNewSync,
 		GetBookmarks: getBookmarks,

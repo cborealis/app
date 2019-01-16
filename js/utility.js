@@ -528,7 +528,7 @@ xBrowserSync.App.Utility = function ($q, platform, globals) {
 		return trimmedText;
 	};
 
-	return {
+	return /** @class xUtility */ {
 		AsyncReduce: asyncReduce,
 		Closest: closest,
 		DecryptData: decryptData,

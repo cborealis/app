@@ -64,7 +64,7 @@ xBrowserSync.App.Platform = function () {
 		}
 	};
 
-	return {
+	return /** @class xPlatform */ {
 		AutomaticUpdates: {
 			Start: notImplemented,
 			Stop: notImplemented

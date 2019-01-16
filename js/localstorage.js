@@ -5,7 +5,7 @@ var xBrowserSync = xBrowserSync || {};
  * Description:
  * ------------------------------------------------------------------------------------ */
 xBrowserSync.LocalStorage = function() {
-    return {
+    return /** @class xLocalStorage */ {
         storageKeys: {
             LocalBookmarks: 'localBookmarks',
             SyncStatus: 'syncStatus',

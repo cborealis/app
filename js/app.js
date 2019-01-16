@@ -149,7 +149,7 @@ xBrowserSync.App.Controller = function ($scope, $q, $timeout, complexify, platfo
                     document.querySelector('#intro-panel-' + panelToDisplay).classList.add('reverse');
                 }
 
-                vm.introduction.showLogo = (!panelToDisplay) ? true : false;
+                vm.introduction.showLogo = (!panelToDisplay);
                 vm.introduction.currentPanel = (!panelToDisplay) ? 0 : panelToDisplay;
             },
             showLogo: true,
