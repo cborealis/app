@@ -106,7 +106,8 @@ xBrowserSync.App.API = function ($http, $q, settings, globals, utility) {
 
 		// Check secret and sync ID are present
 		return settings.getPasswordAndSyncId()
-			.then(function ([password, syncId]) {
+			.then(function (res) {
+				[password, syncId] = res;
 				if (!password || !syncId) {
 					return $q.reject({ code: globals.ErrorCodes.MissingClientData });
 				}
@@ -155,8 +156,8 @@ xBrowserSync.App.API = function ($http, $q, settings, globals, utility) {
 
 		// Check secret and sync ID are present
 		return settings.getPasswordAndSyncId()
-			.then(function ([password, syncId]) {
-console.log("yay! " + password + "  " + syncId);
+			.then((res) => {
+				[password, syncId] = res;
 				if (!password || !syncId) {
 					return $q.reject({ code: globals.ErrorCodes.MissingClientData });
 				}
@@ -165,6 +166,7 @@ console.log("yay! " + password + "  " + syncId);
 				return settings.getServiceUrl();
 			})
 			.then(function (serviceUrl) {
+console.log("yep! " +  syncId);
 				return $http.get(serviceUrl + globals.URL.Bookmarks +
 					'/' + syncId + globals.URL.LastUpdated);
 			})
@@ -228,8 +230,8 @@ console.log("yay! " + password + "  " + syncId);
 
 		// Check secret and sync ID are present
 		return settings.getPasswordAndSyncId()
-			.then(function ([password, syncId]) {
-
+			.then(function (res) {
+				[password, syncId] = res;
 				if (!password || !syncId) {
 					return $q.reject({ code: globals.ErrorCodes.MissingClientData });
 				}

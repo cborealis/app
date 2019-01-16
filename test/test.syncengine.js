@@ -13,32 +13,32 @@ describe('LocalStorage', function() {
   
 describe('SyncEngine', function() {
   it('can get local bookmarks', function() {
-    var ls = xBrowserSync.LocalStorage();
-    var bm = xBrowserSync.Bookmarks(ls);
-    var x = new xBrowserSync.SyncEngine(ls, bm);
+    var $injector = angular.injector(['ng','xBrowserSync.App.ExtensionBackground']);
+
+    let globals = $injector.get('globals');
+    let ls = $injector.get('localstorage');
+    let settings = $injector.get('settings');
+    let enc = $injector.get('encryption');
+    let api = $injector.get('api');
+
+    var bm = xBrowserSync.Bookmarks(globals, ls, settings, enc, api);
+    var x = xBrowserSync.SyncEngine(ls, bm);
     return x.syncBrowserToLocalBookmarks()
-    .then((val) => expect(val).to.eql({}))
+    .then((val) => console.log(val))
   });
 
   it('get $q', function() {
     var $injector = angular.injector(['ng','xBrowserSync.App.ExtensionBackground']);
 
-    // use the injector to kick off your application
-    // use the type inference to auto inject arguments, or use implicit injection
-    $injector.invoke(function($rootScope, $q, $http, api) {
-      console.log($rootScope);
-      console.log($q);
-      console.log($http);
-      console.log(api);
-
-    });
     let platform = $injector.get('platform');
     let globals = $injector.get('globals');
-    let api = $injector.get('api');
     let ls = $injector.get('localstorage');
+    let settings = $injector.get('settings');
+    let enc = $injector.get('encryption');
+    let api = $injector.get('api');
 
-    var bm = xBrowserSync.Bookmarks(ls);
-    var x = new xBrowserSync.SyncEngine(ls, bm, platform, globals, api);
+    var bm = xBrowserSync.Bookmarks(globals, ls, settings, enc, api);
+    var x = xBrowserSync.SyncEngine(ls, bm, platform, globals, api);  // localStorage, bookmarks, platform, globals, api, utility
     x.syncLocalAndServerBookmarks().then((a) => console.log(a));
   });
 

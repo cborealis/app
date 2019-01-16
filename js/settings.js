@@ -25,9 +25,38 @@ xBrowserSync.Settings = function(localStorage, globals) {
             ]).then((keys) => [keys[localStorage.storageKeys.Password],keys[localStorage.storageKeys.SyncId]]);
         },
 
-        getNetworkDisconnected: function() {
-
+        getLastUpdated: function() {
+            return localStorage.get(localStorage.storageKeys.LastUpdated);
         },
+
+        setLastUpdated: function(lastUpdated) {
+            return localStorage.set(localStorage.storageKeys.LastUpdated, lastUpdated);
+        },
+
+        getIsSyncing: function() {
+            return localStorage.get(localStorage.storageKeys.IsSyncing);
+        },
+
+        setIsSyncing: function(isSyncing) {
+            return localStorage.set(localStorage.storageKeys.IsSyncing, isSyncing);
+        },
+
+        getSyncEnabled: function() {
+            return localStorage.get(localStorage.storageKeys.SyncEnabled);
+        },
+
+        setSyncEnabled: function(syncEnabled) {
+            return localStorage.set(localStorage.storageKeys.SyncEnabled, syncEnabled);
+        },
+
+        getSyncVersion: function() {
+            return localStorage.get(localStorage.storageKeys.SyncVersion);
+        },
+
+        getNetworkDisconnected: function() {
+            return localStorage.get(localStorage.storageKeys.NetworkDisconnected);
+        },
+
         /**
          * @param {boolean} isDisconnected
          * @returns {Promise<void>}

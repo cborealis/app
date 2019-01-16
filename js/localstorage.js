@@ -13,7 +13,11 @@ xBrowserSync.LocalStorage = function() {
             ServiceUrl: 'serviceUrl',
             Password: 'password',
             SyncId: 'syncId',
-            NetworkDisconnected: 'networkDisconnected'
+            NetworkDisconnected: 'networkDisconnected',
+            LastUpdated: 'lastUpdated',
+            IsSyncing: 'isSyncing',
+            SyncEnabled: 'syncEnabled',
+            SyncVersion: 'syncVersion'
         },
         /**
          * @param {string | string[]} storageKeys

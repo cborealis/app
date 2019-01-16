@@ -22,8 +22,11 @@ function injectAppServices(module) {
     // Add local storage service
     module.factory('localstorage', [xBrowserSync.LocalStorage]);
 
-    // Add local storage service
+    // Add local settings service
     module.factory('settings', ['localstorage', 'globals', xBrowserSync.Settings]);
+
+    // Add local encryption service
+    module.factory('encryption', ['settings', xBrowserSync.Encryption]);
 
     // Add utility service
     module.factory('utility', ['$q', 'platform', 'globals', xBrowserSync.App.Utility]);
