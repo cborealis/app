@@ -1,4 +1,4 @@
-//@ ts-check
+// _ = require('underscore')
 
 var xBrowserSync = xBrowserSync || {};
 
@@ -268,9 +268,19 @@ xBrowserSync.SyncEngine = function (localStorage, bookmarks, platform, globals, 
         },
 
         doMerge: function(serverBookmarks, localBookmarks, syncStatus) {
-
+            let sbDirs = serverBookmarks.filter((val) => val.hasOwnProperty("children"));
+            let lbDirs = localBookmarks.filter((val) => val.hasOwnProperty("children"));
+            console.log(sbDirs);
+            console.log(lbDirs);
         },
         
+        xBookmarkIsContainer: function (bookmark) {
+            return (bookmark.title === globals.Bookmarks.MenuContainerName ||
+                bookmark.title === globals.Bookmarks.MobileContainerName ||
+                bookmark.title === globals.Bookmarks.OtherContainerName ||
+                bookmark.title === globals.Bookmarks.ToolbarContainerName);
+        },
+    
         /*
         
             browserBookmarks (not in android) => localBookmarks => syncStatus <= serverBookmarks
