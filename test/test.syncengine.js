@@ -15,6 +15,7 @@ describe('SyncEngine', function() {
   it('can get local bookmarks', function() {
     var $injector = angular.injector(['ng','xBrowserSync.App.ExtensionBackground']);
 
+    let platform = $injector.get('platform');
     let globals = $injector.get('globals');
     let ls = $injector.get('localstorage');
     let settings = $injector.get('settings');
@@ -22,9 +23,9 @@ describe('SyncEngine', function() {
     let api = $injector.get('api');
 
     var bm = xBrowserSync.Bookmarks(globals, ls, settings, enc, api);
-    var x = xBrowserSync.SyncEngine(ls, bm);
+    var x = xBrowserSync.SyncEngine(ls, bm, platform, globals, api);
     return x.syncBrowserToLocalBookmarks()
-    .then((val) => console.log(val))
+    .then((val) => console.log("syncBToL: " +val))
   });
 
   it('get $q', function() {

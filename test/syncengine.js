@@ -1,4 +1,4 @@
-// _ = require('underscore')
+//  _ = require('underscore')
 
 var xBrowserSync = xBrowserSync || {};
 
@@ -17,7 +17,7 @@ xBrowserSync.Bookmarks = function (globals, localStorage, settings, encryption, 
     var self = {
         /**
          * @callback iteratorCallback
-         * @param {number} bookmark
+         * @param {{browser.bookmarks.BookmarkTreeNode} bookmark
          */
         /**
          * @param {browser.bookmarks.BookmarkTreeNode[]} bookmarks
@@ -38,12 +38,46 @@ xBrowserSync.Bookmarks = function (globals, localStorage, settings, encryption, 
         },
 
         /**
+         * @param {string} id 
+         * @param {*} tree 
+         * @param {number} index 
+         * @returns { {result, path: [{bookmark, index}]} }
+         */
+        findBookmarkInTree: function (id, tree, index) {
+            if (Array.isArray(tree)) {
+                tree = {
+                    id: -1,
+                    children: tree
+                };
+            }
+    
+            if (tree.id === id) {
+                var path = [{ bookmark: tree, index: index }];
+                return { result: tree, path: path };
+            } else {
+                var children = tree.children || [];
+                for (var i = 0; i < children.length; i++) {
+                    var child = children[i];
+                    var tmp = self.findBookmarkInTree(id, child, i);
+                    if (!_.isEmpty(tmp)) {
+                        tmp.path.unshift({ bookmark: tree, index: index });
+                        return tmp;
+                    }
+                };
+                return {};
+            }
+        },
+
+        /**
          * @returns {Promise<browser.bookmarks.BookmarkTreeNode[]>}
          */
         getBrowserBookmarks: function() {
             return browser.bookmarks.getTree().then((bookmarks) => bookmarks[0].children);
         },
 
+        /**
+         * @returns {Promise<[]>}
+         */
         loadLocalBookmarks: function() {
             return localStorage.get(localStorage.storageKeys.LocalBookmarks)
                 .then((localBookmarks) => {
@@ -51,10 +85,17 @@ xBrowserSync.Bookmarks = function (globals, localStorage, settings, encryption, 
                 })
         },
 
+        /**
+         * @param {[]} localBookmarks 
+         * @returns {Promise<void>}
+         */
         storeLocalBookmarks: function(localBookmarks) {
             return localStorage.set(localStorage.storageKeys.LocalBookmarks, localBookmarks);
         },
 
+        /**
+         * @returns {Promise<{}>}
+         */
         loadSyncStatus: function() {
             return localStorage.get(localStorage.storageKeys.SyncStatus)
                 .then((syncStatus) => {
@@ -62,6 +103,10 @@ xBrowserSync.Bookmarks = function (globals, localStorage, settings, encryption, 
                 })
         },
 
+        /**
+         * @param {{}} localBookmarks 
+         * @returns {Promise<void>}
+         */
         storeSyncStatus: function(syncStatus) {
             return localStorage.set(localStorage.storageKeys.SyncStatus, syncStatus);
         },
@@ -222,20 +267,34 @@ xBrowserSync.SyncEngine = function (localStorage, bookmarks, platform, globals, 
                 return bookmarks.getBrowserBookmarks()
                 .then((browserBookmarks) => {
                     // Get all local bookmarks into dictionary
-                    var xBookmarks = {};
-                    bookmarks.forEachBookmark(localBookmarks, (xbookmark) => {
-                        xBookmarks[xbookmark.id] = xbookmark;
+                    var localBookmarksById = {};
+                    var foundContainers = [];
+                    bookmarks.forEachBookmark(localBookmarks, (lbookmark) => {
+                        localBookmarksById[lbookmark.id] = lbookmark;
                     });
-                    bookmarks.forEachBookmark(browserBookmarks, (bookmark) => {
-                        if (xBookmarks[bookmark.id]) {
-                            self.extendBrowserBookmarkWithXBookmark(bookmark, xBookmarks[bookmark.id]);
+                    bookmarks.forEachBookmark(browserBookmarks, (bbookmark) => {
+                        if (localBookmarksById[bbookmark.id]) {
+                            self.extendBrowserBookmarkWithXBookmark(bbookmark, localBookmarksById[bbookmark.id]);
+                        }
+                        if (self.xBookmarkIsContainer(bbookmark)) {
+                            foundContainers.push(bbookmark);
                         }
                     });
+                    self.moveContainersToRoot(foundContainers, browserBookmarks);
                     console.log(browserBookmarks);
                     return bookmarks.storeLocalBookmarks(browserBookmarks)
                         .then(() => browserBookmarks);
                 });
             })
+        },
+
+        moveContainersToRoot(foundContainers, localBookmarks) {
+            console.log("found containers: " + foundContainers);
+            for (let i=0; i<foundContainers.length; i++) {
+                let parent = bookmarks.findBookmarkInTree(foundContainers[i].parentId, localBookmarks);
+                parent.result.children = _.filter(parent.result.children, (b) => b.id !== foundContainers[i].id);
+                localBookmarks.push(foundContainers[i]);
+            }
         },
         
         /**
@@ -263,8 +322,55 @@ xBrowserSync.SyncEngine = function (localStorage, bookmarks, platform, globals, 
                 console.log(serverBookmarks);
                 console.log(localBookmarks);
                 console.log(syncStatus);
-                return self.doMerge(serverBookmarks, localBookmarks, syncStatus);
+                return self.doTopLevelMerge(serverBookmarks, localBookmarks, syncStatus);
             })
+        },
+
+        doTopLevelMerge: function(serverBookmarks, localBookmarks, syncStatus) {
+            // TODO move to platform
+            var ffNativeRoots = {
+                menuBookmarksId: 'menu________',
+                mobileBookmarksId: 'mobile______',
+                otherBookmarksId: 'unfiled_____',
+                rootBookmarkId: 'root________',
+                toolbarBookmarksId: 'toolbar_____'
+            }
+            var nativeRoots = {
+                menuBookmarksId: 'N/A',
+                mobileBookmarksId: 'N/A',
+                rootBookmarkId: '0',
+                toolbarBookmarksId: '1', 
+                otherBookmarksId: '2'
+            }
+            var containerRoots = {
+                menuBookmarksId: '[xbs] Menu',
+                mobileBookmarksId: '[xbs] Mobile',
+                otherBookmarksId: '[xbs] Other',
+                toolbarBookmarksId: '[xbs] Toolbar'
+            }
+            for (let rootId in containerRoots) {
+                let nativeRoot = _.findWhere(localBookmarks, { id: nativeRoots[rootId] });
+                const title = { title: containerRoots[rootId] };
+                let localRoot = _.findWhere(localBookmarks, title);
+                let serverRoot = _.findWhere(serverBookmarks, title);
+                console.log(rootId);
+                console.log("native: ", nativeRoot);
+                console.log("local:  ", localRoot);
+                console.log("server: ", serverRoot);
+
+                if (nativeRoot && localRoot) {
+                    console.error("Found native root folder AND simulated root folder for ", rootId);
+                    localBookmarks = _.filter(localBookmarks, (b) => b.id !== localRoot);
+                    localRoot = undefined;
+                }
+                if (!nativeRoot && !localRoot && serverRoot) {
+                    // create local simulated root
+                }
+                if ((nativeRoot || localRoot) && !serverRoot) {
+                    // create server side root
+                }
+
+            }
         },
 
         doMerge: function(serverBookmarks, localBookmarks, syncStatus) {
@@ -273,7 +379,7 @@ xBrowserSync.SyncEngine = function (localStorage, bookmarks, platform, globals, 
             console.log(sbDirs);
             console.log(lbDirs);
         },
-        
+    
         xBookmarkIsContainer: function (bookmark) {
             return (bookmark.title === globals.Bookmarks.MenuContainerName ||
                 bookmark.title === globals.Bookmarks.MobileContainerName ||
