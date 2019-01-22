@@ -68,6 +68,18 @@ xBrowserSync.Bookmarks = function (globals, localStorage, settings, encryption, 
             }
         },
 
+        getNewBookmarkId: function (bookmarks) {
+            var highestId = 0;
+    
+            self.forEachBookmark(bookmarks, function (bookmark) {
+                if (!_.isUndefined(bookmark.id) && bookmark.id > highestId) {
+                    highestId = bookmark.id;
+                }
+            });
+    
+            return highestId + 1;
+        },
+    
         /**
          * @returns {Promise<browser.bookmarks.BookmarkTreeNode[]>}
          */
@@ -319,14 +331,11 @@ xBrowserSync.SyncEngine = function (localStorage, bookmarks, platform, globals, 
             })
             .then((res) => {
                 [serverBookmarks, localBookmarks, syncStatus] = res;
-                console.log(serverBookmarks);
-                console.log(localBookmarks);
-                console.log(syncStatus);
-                return self.doTopLevelMerge(serverBookmarks, localBookmarks, syncStatus);
+                return self.doTopLevelMerge(localBookmarks, serverBookmarks, syncStatus);
             })
         },
 
-        doTopLevelMerge: function(serverBookmarks, localBookmarks, syncStatus) {
+        doTopLevelMerge: function(localBookmarks, serverBookmarks, syncStatus) {
             // TODO move to platform
             var ffNativeRoots = {
                 menuBookmarksId: 'menu________',
@@ -363,14 +372,128 @@ xBrowserSync.SyncEngine = function (localStorage, bookmarks, platform, globals, 
                     localBookmarks = _.filter(localBookmarks, (b) => b.id !== localRoot);
                     localRoot = undefined;
                 }
-                if (!nativeRoot && !localRoot && serverRoot) {
+                localRoot = localRoot || nativeRoot;
+                if (!localRoot && serverRoot) {
                     // create local simulated root
+                    localRoot = { id: bookmarks.getNewBookmarkId(localBookmarks), title: containerRoots[rootId], children: [] };  // set new ID here?
+                    localBookmarks.push(localRoot);
+                    // TODO remember change
                 }
-                if ((nativeRoot || localRoot) && !serverRoot) {
+                if (localRoot && !serverRoot) {
                     // create server side root
+                    serverRoot = { id: bookmarks.getNewBookmarkId(serverBookmarks), title: containerRoots[rootId], children: [], dateAdded: localRoot.dateAdded };
+                    serverBookmarks.push(serverRoot);
                 }
-
+                if (localRoot && serverRoot) {
+                    self.doRootFolderMerge(localRoot, serverRoot, localBookmarks, serverBookmarks, syncStatus);
+                }
             }
+            console.log("server ", serverBookmarks);
+            console.log("local ", localBookmarks);
+            console.log("sync ", syncStatus);
+
+        },
+
+        doRootFolderMerge(localRoot, serverRoot, localBookmarks, serverBookmarks, syncStatus) {
+            self.processFolderAdds(localRoot, serverRoot, localBookmarks, serverBookmarks, syncStatus);
+        },
+
+        processFolderAdds(localFolder, serverFolder, localBookmarks, serverBookmarks, syncStatus) {
+            let matches = self.matchBookmarks(localFolder.children, serverFolder.children, localBookmarks, serverBookmarks, syncStatus);
+            console.log(matches);
+            let lNewFolders = _.filter(matches, m => m.A && !m.B && !m.children);
+            let sNewFolders = _.filter(matches, m => !m.A && m.B && !m.children);
+            console.log(lNewFolders);
+            console.log(sNewFolders);
+        },
+
+        matchBookmarks(lFolders, sFolders, localBookmarks, serverBookmarks, syncStatus) {
+            var matches = [];
+            for(let i=0; i<lFolders.length; i++) {
+                let lbookmark = lFolders[i];
+                let lsync = _.findWhere(syncStatus, { id: lbookmark.id });
+                if (lsync) {
+                    let rMatch = _.findWhere(sFolders, { id: lsync.xid });
+                    if (rMatch) {
+                        console.log("A B status");
+                        matches.push({A: lbookmark, B: rMatch, status: lsync});
+                    } else {
+                        // search entire tree to see if bookmark was moved
+                        let moved = bookmarks.findBookmarkInTree(lsync.xid, serverBookmarks);
+                        if (moved.result) {
+                            console.log("A B status, moved");
+                            matches.push({A: lbookmark, B: moved.result, status: lsync});
+                        } else {
+                            console.log("A !B status");
+                            matches.push({A: lbookmark, B: null, status: lsync});
+                        }
+                    }
+                } else {
+                    let rMatch;
+                    if (lbookmark.url) {
+                        rMatch = _.findWhere(sFolders, { url: lbookmark.url });
+                    } else {
+                        rMatch = _.findWhere(sFolders, { title: lbookmark.title });
+                    }
+                    if (rMatch) {
+                        let rReverseSync = _.findWhere(syncStatus, { xid: rMatch.id });
+                        if (rReverseSync) {
+                            // we found a bookmark that is already synced -> match was wrong
+                            console.log("A !B !status");
+                            matches.push({A: lbookmark, B: null, status: null});
+                        } else {
+                            console.log("A B !status");
+                            matches.push({A: lbookmark, B: rMatch, status: null});
+                        }
+                    } else {
+                        console.log("A !B !status");
+                        matches.push({A: lbookmark, B: null, status: null});
+                    }
+                }
+            }
+            for(let i=0; i<sFolders.length; i++) {
+                let sbookmark = sFolders[i];
+                let ssync = _.findWhere(syncStatus, { xid: sbookmark.id });
+                if (ssync) {
+                    let lMatch = _.findWhere(lFolders, { id: ssync.id });
+                    if (lMatch) {
+                        console.log("A B status");
+//                        matches.push({A: lbookmark, B: rMatch, status: lsync});
+                    } else {
+                        // search entire tree to see if bookmark was moved
+                        let moved = bookmarks.findBookmarkInTree(ssync.id, localBookmarks);
+                        if (moved.result) {
+                            console.log("A B status, moved");
+                            matches.push({A: moved.result, B: sbookmark, status: ssync});
+                        } else {
+                            console.log("!A B status");
+                            matches.push({A: null, B: sbookmark, status: ssync});
+                        }
+                    }
+                } else {
+                    let lMatch;
+                    if (sbookmark.url) {
+                        lMatch = _.findWhere(lFolders, { url: sbookmark.url });
+                    } else {
+                        lMatch = _.findWhere(lFolders, { title: sbookmark.title });
+                    }
+                    if (lMatch) {
+                        let lReverseSync = _.findWhere(syncStatus, { id: lMatch.id });
+                        if (lReverseSync) {
+                            // we found a bookmark that is already synced -> match was wrong
+                            console.log("!A B !status");
+                            matches.push({A: null, B: sbookmark, status: null});
+                        } else {
+                            console.log("A B !status");
+//                            matches.push({A: lbookmark, B: rMatch, status: null});
+                        }
+                    } else {
+                        console.log("!A B !status");
+                        matches.push({A: null, B: sbookmark, status: null});
+                    }
+                }
+            }
+            return matches;
         },
 
         doMerge: function(serverBookmarks, localBookmarks, syncStatus) {
@@ -412,8 +535,10 @@ xBrowserSync.SyncEngine = function (localStorage, bookmarks, platform, globals, 
         -> may throw OptimisticLockError when lastsync changed in the meantime
             -> doAgain
         
-        folder adds and changes must be processed first
+        folder adds must be processed first
+        then folder changes
         then bookmarks
+        then folder moves
         then folder deletes
         only delete folder if empty
         
