@@ -17,7 +17,7 @@ xBrowserSync.Bookmarks = function (globals, localStorage, settings, encryption, 
     var self = {
         /**
          * @callback iteratorCallback
-         * @param {{browser.bookmarks.BookmarkTreeNode} bookmark
+         * @param {browser.bookmarks.BookmarkTreeNode} bookmark
          */
         /**
          * @param {browser.bookmarks.BookmarkTreeNode[]} bookmarks
@@ -52,24 +52,24 @@ xBrowserSync.Bookmarks = function (globals, localStorage, settings, encryption, 
             }
     
             if (tree.id === id) {
-                var path = [{ bookmark: tree, index: index }];
+                let path = [{ bookmark: tree, index: index }];
                 return { result: tree, path: path };
             } else {
-                var children = tree.children || [];
-                for (var i = 0; i < children.length; i++) {
-                    var child = children[i];
-                    var tmp = self.findBookmarkInTree(id, child, i);
+                let children = tree.children || [];
+                for (let i = 0; i < children.length; i++) {
+                    let child = children[i];
+                    let tmp = self.findBookmarkInTree(id, child, i);
                     if (!_.isEmpty(tmp)) {
                         tmp.path.unshift({ bookmark: tree, index: index });
                         return tmp;
                     }
-                };
+                }
                 return {};
             }
         },
 
         getNewBookmarkId: function (bookmarks) {
-            var highestId = 0;
+            let highestId = 0;
     
             self.forEachBookmark(bookmarks, function (bookmark) {
                 if (!_.isUndefined(bookmark.id) && bookmark.id > highestId) {
@@ -116,7 +116,7 @@ xBrowserSync.Bookmarks = function (globals, localStorage, settings, encryption, 
         },
 
         /**
-         * @param {{}} localBookmarks 
+         * @param {{}} syncStatus
          * @returns {Promise<void>}
          */
         storeSyncStatus: function(syncStatus) {
@@ -127,7 +127,7 @@ xBrowserSync.Bookmarks = function (globals, localStorage, settings, encryption, 
          * @returns {Promise<boolean>}
          */
         checkIfServerBookmarksOutOfDate: function () {
-            var localLastUpdated;
+            let localLastUpdated;
         
             return settings.getLastUpdated()
             .then((lastUpdated) => {
@@ -261,7 +261,7 @@ xBrowserSync.XBookmark = function (title, url, description, tags, children, xid,
  * ------------------------------------------------------------------------------------ */
 xBrowserSync.SyncEngine = function (localStorage, bookmarks, platform, globals, api, utility) {
     'use strict';
-    var self = {
+    let self = {
         extendBrowserBookmarkWithXBookmark: function(bookmark, xbookmark) {
             for (let v in xbookmark) {
                 // copy all properties that bookmark doesn't already have
@@ -279,8 +279,8 @@ xBrowserSync.SyncEngine = function (localStorage, bookmarks, platform, globals, 
                 return bookmarks.getBrowserBookmarks()
                 .then((browserBookmarks) => {
                     // Get all local bookmarks into dictionary
-                    var localBookmarksById = {};
-                    var foundContainers = [];
+                    let localBookmarksById = {};
+                    let foundContainers = [];
                     bookmarks.forEachBookmark(localBookmarks, (lbookmark) => {
                         localBookmarksById[lbookmark.id] = lbookmark;
                     });
@@ -323,7 +323,7 @@ xBrowserSync.SyncEngine = function (localStorage, bookmarks, platform, globals, 
          * @returns {*}
          */
         syncLocalAndServerBookmarks: function() {
-            var serverBookmarksUpdated, serverBookmarks, localBookmarks, syncStatus;
+            let serverBookmarksUpdated, serverBookmarks, localBookmarks, syncStatus;
             return bookmarks.retrieveServerBookmarksIfOutOfDate()
             .then((updated) => {
                 serverBookmarksUpdated = updated;
@@ -343,20 +343,20 @@ xBrowserSync.SyncEngine = function (localStorage, bookmarks, platform, globals, 
                 otherBookmarksId: 'unfiled_____',
                 rootBookmarkId: 'root________',
                 toolbarBookmarksId: 'toolbar_____'
-            }
+            };
             var nativeRoots = {
                 menuBookmarksId: 'N/A',
                 mobileBookmarksId: 'N/A',
                 rootBookmarkId: '0',
                 toolbarBookmarksId: '1', 
                 otherBookmarksId: '2'
-            }
+            };
             var containerRoots = {
                 menuBookmarksId: '[xbs] Menu',
                 mobileBookmarksId: '[xbs] Mobile',
                 otherBookmarksId: '[xbs] Other',
                 toolbarBookmarksId: '[xbs] Toolbar'
-            }
+            };
             for (let rootId in containerRoots) {
                 let nativeRoot = _.findWhere(localBookmarks, { id: nativeRoots[rootId] });
                 const title = { title: containerRoots[rootId] };
@@ -408,8 +408,8 @@ xBrowserSync.SyncEngine = function (localStorage, bookmarks, platform, globals, 
         },
 
         matchBookmarks(lFolders, sFolders, localBookmarks, serverBookmarks, syncStatus) {
-            var matches = [];
-            for(let i=0; i<lFolders.length; i++) {
+            let matches = [];
+            for (let i=0; i<lFolders.length; i++) {
                 let lbookmark = lFolders[i];
                 let lsync = _.findWhere(syncStatus, { id: lbookmark.id });
                 if (lsync) {
@@ -451,7 +451,7 @@ xBrowserSync.SyncEngine = function (localStorage, bookmarks, platform, globals, 
                     }
                 }
             }
-            for(let i=0; i<sFolders.length; i++) {
+            for (let i=0; i<sFolders.length; i++) {
                 let sbookmark = sFolders[i];
                 let ssync = _.findWhere(syncStatus, { xid: sbookmark.id });
                 if (ssync) {
